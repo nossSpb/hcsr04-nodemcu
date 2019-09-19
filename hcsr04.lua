@@ -50,7 +50,7 @@ function HCSR04(trig_pin, echo_pin, max_distance, avg_readings, measure_availabl
 	self.measure_available_cb = nil
 
 	-- change this if you are already using the timer id 0
-	local trigger_timer_id = 0
+	local trigger_timer_id = tmr.create()
 
 	-- private fields
 	local echo_start = 0
@@ -72,7 +72,7 @@ function HCSR04(trig_pin, echo_pin, max_distance, avg_readings, measure_availabl
 	-- start a measure cycle
 	function self.measure()
 		readings = {}
-		tmr.start(trigger_timer_id)
+		trigger_timer_id:start()
 	end
 
 	-- called when measure is done
@@ -130,7 +130,7 @@ function HCSR04(trig_pin, echo_pin, max_distance, avg_readings, measure_availabl
 
 		-- got all readings
 		if #readings >= self.avg_readings then
-			tmr.stop(trigger_timer_id)
+			trigger_timer_id:stop()
 
 			-- calculate the average of the readings
 			distance = 0
@@ -172,7 +172,7 @@ function HCSR04(trig_pin, echo_pin, max_distance, avg_readings, measure_availabl
 	gpio.mode(echo_pin, gpio.INT)
 
 	-- trigger timer
-	tmr.register(trigger_timer_id, reading_interval, tmr.ALARM_AUTO, self.trigger)
+	trigger_timer_id:register(reading_interval, tmr.ALARM_AUTO, self.trigger)
 
 	-- set callback function to be called both on rising and falling edges
 	gpio.trig(echo_pin, "both", self.echo_callback)
